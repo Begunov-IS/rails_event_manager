@@ -1,0 +1,84 @@
+1 Создать по 2-3 записи для каждой таблицы, билетов можно больше сделать
+Ticket.destroy_all
+Event.destroy_all
+Category.destroy_all
+User.destroy_all
+
+u1 = User.create(name: 'Иван', email: 'ivan@example.com')
+u2 = User.create(name: 'Иван2', email: 'ivan2@example.com')
+u3 = User.create(name: 'Иван3', email: 'ivan3@example.com')
+
+c1 = Category.create(title: 'c1')
+c2 = Category.create(title: 'c2')
+c3 = Category.create(title: 'c3')
+
+e1 = Event.create(
+  title: 'e1',
+  location: 'мск',
+  from_date: 2.days.from_now,
+  to_date: 2.days.from_now + 3.hours,
+  owner: u1,
+  category: c1
+)
+
+e2 = Event.create(
+  title: 'e2',
+  location: 'спб',
+  from_date: 4.days.from_now,
+  to_date: 4.days.from_now + 2.hours,
+  owner: u2,
+  category: c2
+)
+
+e3 = Event.create(
+  title: 'e3',
+  location: 'Воронеж',
+  from_date: 10.days.from_now,
+  to_date: 10.days.from_now + 2.5.hours,
+  owner: u1,
+  category: c3
+)
+
+e4 = Event.create(
+  title: 'e4',
+  location: 'иск',
+  from_date: 3.days.from_now,
+  to_date: 3.days.from_now + 2.hours,
+  owner: u3,
+  category: c1
+)
+
+e5 = Event.create(
+  title: 'e5',
+  location: 'Воронеж',
+  from_date: 15.days.from_now,
+  to_date: 15.days.from_now + 4.hours,
+  owner: u2,
+  category: nil
+)
+
+Ticket.create(event: e1, price: 1500, status: 'booked', user: u1)
+Ticket.create(event: e1, price: 1500, status: 'booked', user: u2)
+Ticket.create(event: e1, price: 1500, status: 'available', user: nil)
+
+Ticket.create(event: e2, price: 2500, status: 'booked', user: u1)
+Ticket.create(event: e2, price: 2500, status: 'available', user: nil)
+Ticket.create(event: e2, price: 3000, status: 'available', user: nil)
+
+Ticket.create(event: e3, price: 4000, status: 'booked', user: u2)
+Ticket.create(event: e3, price: 4500, status: 'cancelled', user: nil)
+Ticket.create(event: e3, price: 4000, status: 'available', user: nil)
+Ticket.create(event: e3, price: 5000, status: 'available', user: nil)
+
+
+2 Выбрать всех юзеров у которых нет билета
+User.where.not(id: Ticket.select(:user_id).distinct)
+
+3 Выбрать все ивенты у которых не было билетов
+Event.where.not(id: Ticket.select(:event_id).distinct)
+
+4 По каждой категории посчитать среднюю цену билету
+Category.joins(events: :tickets).group('categories.title').average('tickets.price')
+
+5 Выбрать все события, которые будут на текущей неделе
+Event.where(from_date: Time.current.beginning_of_week..Time.current.end_of_week)
