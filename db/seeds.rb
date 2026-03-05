@@ -1,3 +1,5 @@
+Notification.delete_all
+Review.delete_all
 Attendance.delete_all
 EventSponsor.delete_all
 Ticket.delete_all
@@ -104,6 +106,16 @@ Attendance.create!(user: u2, event: e1, checked_in_at: Time.current)
 Attendance.create!(user: u1, event: e2, checked_in_at: Time.current)
 Attendance.create!(user: u3, event: e3, checked_in_at: nil)
 
+Review.create!(user: u1, event: e1, review_text: 'Отличный фестиваль!', rating: 5, status: 'published')
+Review.create!(user: u2, event: e1, review_text: 'Хорошо, но шумно', rating: 4, status: 'published')
+Review.create!(user: u1, event: e2, review_text: 'Полезная конференция', rating: 5, status: 'pending')
+
+Notification.create!(user: u1, message: 'билет подтверждён', notification_type: 'ticket_confirmed', read: true)
+Notification.create!(user: u1, message: 'билет подтверждён', notification_type: 'ticket_confirmed', read: false)
+Notification.create!(user: u2, message: 'новый отзыв', notification_type: 'new_review', read: false)
+Notification.create!(user: u3, message: 'мероприятие отменено', notification_type: 'event_cancelled', read: false)
+
 puts "Seeded: #{User.count} users, #{Category.count} categories, #{Venue.count} venues, " \
      "#{Sponsor.count} sponsors, #{Event.count} events, #{Ticket.count} tickets, " \
-     "#{EventSponsor.count} event_sponsors, #{Attendance.count} attendances"
+     "#{EventSponsor.count} event_sponsors, #{Attendance.count} attendances, " \
+     "#{Review.count} reviews, #{Notification.count} notifications"
