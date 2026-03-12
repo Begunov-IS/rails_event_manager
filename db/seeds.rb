@@ -80,7 +80,7 @@ e5 = Event.create!(
 )
 
 # --- Tickets ---
-Ticket.create!(event: e1, price: 1500, status: 'booked', user: u1)
+t1 = Ticket.create!(event: e1, price: 1500, status: 'booked', user: u1)
 Ticket.create!(event: e1, price: 1500, status: 'booked', user: u2)
 Ticket.create!(event: e1, price: 1500, status: 'available', user: nil)
 
@@ -93,7 +93,6 @@ Ticket.create!(event: e3, price: 4500, status: 'cancelled', user: nil)
 Ticket.create!(event: e3, price: 4000, status: 'available', user: nil)
 Ticket.create!(event: e3, price: 5000, status: 'available', user: nil)
 
-# --- Event Sponsors ---
 EventSponsor.create!(event: e1, sponsor: s1, amount: 500_000)
 EventSponsor.create!(event: e1, sponsor: s2, amount: 300_000)
 EventSponsor.create!(event: e2, sponsor: s2, amount: 200_000)
@@ -106,14 +105,14 @@ Attendance.create!(user: u2, event: e1, checked_in_at: Time.current)
 Attendance.create!(user: u1, event: e2, checked_in_at: Time.current)
 Attendance.create!(user: u3, event: e3, checked_in_at: nil)
 
-Review.create!(user: u1, event: e1, review_text: 'Отличный фестиваль!', rating: 5, status: 'published')
+r1 = Review.create!(user: u1, event: e1, review_text: 'Отличный фестиваль!', rating: 5, status: 'published')
 Review.create!(user: u2, event: e1, review_text: 'Хорошо, но шумно', rating: 4, status: 'published')
 Review.create!(user: u1, event: e2, review_text: 'Полезная конференция', rating: 5, status: 'pending')
 
-Notification.create!(user: u1, message: 'билет подтверждён', notification_type: 'ticket_confirmed', read: true)
-Notification.create!(user: u1, message: 'билет подтверждён', notification_type: 'ticket_confirmed', read: false)
-Notification.create!(user: u2, message: 'новый отзыв', notification_type: 'new_review', read: false)
-Notification.create!(user: u3, message: 'мероприятие отменено', notification_type: 'event_cancelled', read: false)
+Notification.create!(user: u1, notifiable: t1, message: 'билет подтверждён', notification_type: 'ticket_confirmed', read: true)
+Notification.create!(user: u1, notifiable: t1, message: 'билет подтверждён', notification_type: 'ticket_confirmed', read: false)
+Notification.create!(user: u2, notifiable: r1, message: 'новый отзыв', notification_type: 'new_review', read: false)
+Notification.create!(user: u3, notifiable: e3, message: 'мероприятие отменено', notification_type: 'event_cancelled', read: false)
 
 puts "Seeded: #{User.count} users, #{Category.count} categories, #{Venue.count} venues, " \
      "#{Sponsor.count} sponsors, #{Event.count} events, #{Ticket.count} tickets, " \

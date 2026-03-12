@@ -1,5 +1,6 @@
 class Notification < ApplicationRecord
   belongs_to :user
+  belongs_to :notifiable, polymorphic: true, optional: true
 
   TYPES = ['ticket_confirmed', 'event_cancelled', 'new_review']
 

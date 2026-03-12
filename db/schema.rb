@@ -49,10 +49,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_04_143110) do
   create_table "notifications", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "message", null: false
+    t.bigint "notifiable_id"
+    t.string "notifiable_type"
     t.string "notification_type", null: false
     t.boolean "read", default: false, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable"
     t.index ["read"], name: "index_notifications_on_read"
     t.index ["user_id"], name: "index_notifications_on_user_id"
   end
