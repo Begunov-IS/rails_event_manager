@@ -2,36 +2,39 @@ class EventsController < ActionController::API
   before_action :set_event, only: [:show, :update, :destroy]
 
   def index
-    events = Event.all
+    events = Event.includes(:owner, :category, :venue)
     events = events.where(category_id: params[:category_id]) if params[:category_id].present?
     events = events.where('from_date >= ?', params[:from_date]) if params[:from_date].present?
     events = events.where('to_date <= ?', params[:to_date]) if params[:to_date].present?
-    render json: events
+    render json: EventBlueprint.render(events)
   end
 
   def show
-    render json: @event
+    render json: EventBlueprint.render(@event)
   end
 
   def create
-    event = Event.new(event_params)
-    if event.save
-      render json: event, status: :created
+    result = Events::Create.call(params: event_params)
+
+    if result.success?
+      render json: EventBlueprint.render(result.event), status: :created
     else
-      render json: { errors: event.errors }, status: :unprocessable_entity
+      render json: { errors: result.errors }, status: :unprocessable_entity
     end
   end
 
   def update
-    if @event.update(event_params)
-      render json: @event
+    result = Events::Update.call(event: @event, params: event_params)
+
+    if result.success?
+      render json: EventBlueprint.render(@event)
     else
-      render json: { errors: @event.errors }, status: :unprocessable_entity
+      render json: { errors: result.errors }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @event.destroy
+    Events::Destroy.call(event: @event)
     head :no_content
   end
 
