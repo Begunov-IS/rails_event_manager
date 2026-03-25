@@ -82,6 +82,7 @@ GEM
     bcrypt_pbkdf (1.1.2-x86_64-darwin)
     bigdecimal (4.0.1)
     bindex (0.8.1)
+    blueprinter (1.2.1)
     bootsnap (1.23.0)
       msgpack (~> 1.2)
     brakeman (8.0.2)
@@ -126,6 +127,11 @@ GEM
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
+    interactor (3.2.0)
+      ostruct
+    interactor-rails (2.3.0)
+      interactor (~> 3.0)
+      railties (>= 7.0)
     io-console (0.8.2)
     irb (1.17.0)
       pp (>= 0.6.0)
@@ -372,12 +378,14 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  blueprinter
   bootsnap
   brakeman
   bundler-audit
   debug
   image_processing (~> 1.2)
   importmap-rails
+  interactor-rails
   jbuilder
   kamal
   pg (~> 1.1)
