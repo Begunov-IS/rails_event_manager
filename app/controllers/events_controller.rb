@@ -6,35 +6,35 @@ class EventsController < ActionController::API
     events = events.where(category_id: params[:category_id]) if params[:category_id].present?
     events = events.where('from_date >= ?', params[:from_date]) if params[:from_date].present?
     events = events.where('to_date <= ?', params[:to_date]) if params[:to_date].present?
-    render json: EventBlueprint.render(events)
+    render json: EventBlueprint.render(events, view: :basic)
   end
 
   def show
-    render json: EventBlueprint.render(@event)
+    render json: EventBlueprint.render(@event, view: :basic)
   end
 
   def create
-    result = Events::Create.call(params: event_params)
+    outcome = Events::Create.run(event_params)
 
-    if result.success?
-      render json: EventBlueprint.render(result.event), status: :created
+    if outcome.valid?
+      render json: EventBlueprint.render(outcome.result, view: :basic), status: :created
     else
-      render json: { errors: result.errors }, status: :unprocessable_entity
+      render json: { errors: outcome.errors }, status: :unprocessable_entity
     end
   end
 
   def update
-    result = Events::Update.call(event: @event, params: event_params)
+    outcome = Events::Update.run(event_params.merge(event: @event))
 
-    if result.success?
-      render json: EventBlueprint.render(@event)
+    if outcome.valid?
+      render json: EventBlueprint.render(outcome.result, view: :basic)
     else
-      render json: { errors: result.errors }, status: :unprocessable_entity
+      render json: { errors: outcome.errors }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    Events::Destroy.call(event: @event)
+    Events::Destroy.run!(event: @event)
     head :no_content
   end
 

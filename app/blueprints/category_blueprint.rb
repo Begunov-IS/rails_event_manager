@@ -1,4 +1,7 @@
 class CategoryBlueprint < Blueprinter::Base
   identifier :id
-  fields :title
+
+  view :basic do
+    fields :title
+  end
 end

@@ -1,14 +1,18 @@
 module Events
-  class Create
-    include Interactor
+  class Create < ActiveInteraction::Base
+    string :title, :location
+    time :from_date, :to_date
+    integer :owner_id
+    integer :category_id, default: nil
+    integer :venue_id, default: nil
 
-    def call
-      event = Event.new(context.params)
+    def execute
+      event = Event.new(inputs)
 
       if event.save
-        context.event = event
+        event
       else
-        context.fail!(errors: event.errors)
+        errors.merge!(event.errors)
       end
     end
   end

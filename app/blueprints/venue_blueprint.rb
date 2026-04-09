@@ -1,4 +1,7 @@
 class VenueBlueprint < Blueprinter::Base
   identifier :id
-  fields :name, :city, :address, :capacity
+
+  view :basic do
+    fields :name, :city, :address, :capacity
+  end
 end

@@ -1,9 +1,9 @@
 module Events
-  class Destroy
-    include Interactor
+  class Destroy < ActiveInteraction::Base
+    object :event
 
-    def call
-      context.event.destroy
+    def execute
+      event.destroy
     end
   end
 end
