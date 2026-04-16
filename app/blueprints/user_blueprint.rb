@@ -4,4 +4,8 @@ class UserBlueprint < Blueprinter::Base
   view :basic do
     fields :name, :email
   end
+
+  view :index do
+    fields :name, :email
+  end
 end

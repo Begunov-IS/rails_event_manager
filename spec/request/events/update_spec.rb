@@ -21,10 +21,6 @@ RSpec.describe 'PATCH /events/:id', type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it 'returns updated event' do
-      expect(json['title']).to eq('Новое название')
-    end
-
     it 'updates event in database' do
       expect(event.reload.title).to eq('Новое название')
     end
@@ -47,14 +43,46 @@ RSpec.describe 'PATCH /events/:id', type: :request do
   context 'when params invalid' do
     let(:params) { { event: { title: '' } } }
 
-    before { put_json url, params: params }
+    it 'returns unprocessable entity with errors' do
+      put_json url, params: params
 
-    it 'returns unprocessable entity' do
       expect(response).to have_http_status(:unprocessable_entity)
+      expect(json).to eq(
+        {
+          'errors' => {
+            'title' => ["can't be blank"]
+          }
+        }
+      )
     end
+  end
 
-    it 'returns errors' do
-      expect(json).to have_key('errors')
+  context 'when params are empty' do
+    let(:params) { { event: {} } }
+
+    it 'does not change event' do
+      initial_attributes = event.reload.attributes.slice(
+        'title',
+        'location',
+        'from_date',
+        'to_date',
+        'owner_id',
+        'category_id',
+        'venue_id'
+      )
+
+      put_json url, params: params
+
+      expect(response).to have_http_status(:ok)
+      expect(event.reload.attributes.slice(
+        'title',
+        'location',
+        'from_date',
+        'to_date',
+        'owner_id',
+        'category_id',
+        'venue_id'
+      )).to eq(initial_attributes)
     end
   end
 end
