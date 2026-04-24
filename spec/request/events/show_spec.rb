@@ -14,7 +14,7 @@ RSpec.describe 'GET /events/:id', type: :request do
     end
 
     it 'returns event' do
-      expect(json).to eq(event_base_response(event.reload))
+      expect(json).to eq(success_response(:event, event_base_response(event.reload)))
     end
   end
 
@@ -28,7 +28,7 @@ RSpec.describe 'GET /events/:id', type: :request do
     end
 
     it 'returns error message' do
-      expect(json).to eq({ 'error' => 'event not found' })
+      expect(json).to eq(failure_response(error_response('base', ['event not found'])))
     end
   end
 end

@@ -16,7 +16,7 @@ RSpec.describe 'GET /events/my', type: :request do
     end
 
     it 'returns only current user events' do
-      expect(json).to eq([event_base_response(user_event.reload)])
+      expect(json).to eq(success_response(:events, [event_base_response(user_event.reload)]))
     end
   end
 
@@ -28,7 +28,7 @@ RSpec.describe 'GET /events/my', type: :request do
     end
 
     it 'returns error message' do
-      expect(json).to eq({ 'error' => 'unauthorized' })
+      expect(json).to eq(failure_response(error_response('base', ['unauthorized'])))
     end
   end
 end

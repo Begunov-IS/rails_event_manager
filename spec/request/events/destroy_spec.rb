@@ -53,7 +53,7 @@ RSpec.describe 'DELETE /events/:id', type: :request do
     end
 
     it 'returns error message' do
-      expect(json).to eq({ 'error' => 'event not found' })
+      expect(json).to eq(failure_response(error_response('base', ['event not found'])))
     end
   end
 end

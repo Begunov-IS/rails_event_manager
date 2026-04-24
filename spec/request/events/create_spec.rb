@@ -27,7 +27,7 @@ RSpec.describe 'POST /events', type: :request do
       post_json url, params: params
 
       event = Event.last
-      expect(json).to eq(event_base_response(event))
+      expect(json).to eq(success_response(:event, event_base_response(event)))
     end
 
     it 'creates event in database' do
@@ -43,13 +43,11 @@ RSpec.describe 'POST /events', type: :request do
 
       expect(response).to have_http_status(:unprocessable_entity)
       expect(json).to eq(
-        {
-          'errors' => {
-            'from_date' => ['is required'],
-            'to_date' => ['is required'],
-            'owner_id' => ['is required']
-          }
-        }
+        failure_response(
+          error_response('from_date', ['is required']),
+          error_response('to_date', ['is required']),
+          error_response('owner_id', ['is required'])
+        )
       )
     end
   end

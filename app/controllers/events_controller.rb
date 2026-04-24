@@ -3,41 +3,62 @@ class EventsController < ActionController::API
   before_action :set_event, only: [:show, :update, :destroy]
 
   def index
-    outcome = Events::Index.run(index_params)
+    outcome = Events::Index.run(
+      params.permit(
+        :city,
+        :owner_id,
+        :from_date,
+        :to_date,
+        :with_available_tickets,
+        :with_checked_in_users,
+        :sort_by,
+        :page,
+        :per_page,
+        category_ids: []
+      )
+    )
 
     if outcome.valid?
-      render json: EventBlueprint.render(outcome.result, view: :index)
+      render_success(
+        :events,
+        EventBlueprint.render_as_hash(outcome.result.fetch(:events), view: :index),
+        meta: outcome.result.fetch(:pagination_info)
+      )
     else
-      render json: { errors: outcome.errors }, status: :unprocessable_entity
+      render_failure(outcome.errors, status: :unprocessable_entity)
     end
   end
 
   def my
     events = Event.includes(:owner, :category, :venue).owned_by(current_user)
-    render json: EventBlueprint.render(events, view: :basic)
+    render_success(:events, EventBlueprint.render_as_hash(events, view: :basic))
   end
 
   def show
-    render json: EventBlueprint.render(@event, view: :basic)
+    render_success(:event, EventBlueprint.render_as_hash(@event, view: :basic))
   end
 
   def create
-    outcome = Events::Create.run(event_params)
+    outcome = Events::Create.run(create_event_params)
 
     if outcome.valid?
-      render json: EventBlueprint.render(outcome.result, view: :basic), status: :created
+      render_success(
+        :event,
+        EventBlueprint.render_as_hash(outcome.result, view: :basic),
+        status: :created
+      )
     else
-      render json: { errors: outcome.errors }, status: :unprocessable_entity
+      render_failure(outcome.errors, status: :unprocessable_entity)
     end
   end
 
   def update
-    outcome = Events::Update.run(event_params.merge(event: @event))
+    outcome = Events::Update.run(update_event_params.merge(event: @event))
 
     if outcome.valid?
-      render json: EventBlueprint.render(outcome.result, view: :basic)
+      render_success(:event, EventBlueprint.render_as_hash(outcome.result, view: :basic))
     else
-      render json: { errors: outcome.errors }, status: :unprocessable_entity
+      render_failure(outcome.errors, status: :unprocessable_entity)
     end
   end
 
@@ -49,7 +70,9 @@ class EventsController < ActionController::API
   private
 
   def authenticate_user!
-    render json: { error: 'unauthorized' }, status: :unauthorized unless current_user
+    return if current_user
+
+    render_failure({ base: ['unauthorized'] }, status: :unauthorized)
   end
 
   def current_user
@@ -57,37 +80,64 @@ class EventsController < ActionController::API
   end
 
   def set_event
-    @event = Event.find_by(id: params[:id])
-    render json: { error: 'event not found' }, status: :not_found unless @event
+    outcome = Events::Find.run(id: params[:id])
+    @event = outcome.result
+
+    return if @event
+
+    render_failure({ base: ['event not found'] }, status: :not_found)
   end
 
-  def event_params
+  def create_event_params
     params.require(:event).permit(:title, :location, :from_date, :to_date, :owner_id, :category_id, :venue_id)
   end
 
-  def index_params
-    {}.tap do |result|
-      result[:category_ids] = normalized_category_ids if normalized_category_ids.any?
-      result[:city] = params[:city] if params[:city].present?
-      result[:owner_id] = params[:owner_id] if params[:owner_id].present?
-      result[:from_date] = params[:from_date] if params[:from_date].present?
-      result[:to_date] = params[:to_date] if params[:to_date].present?
-      result[:with_available_tickets] = params[:with_available_tickets] if params.key?(:with_available_tickets)
-      result[:with_checked_in_users] = params[:with_checked_in_users] if params.key?(:with_checked_in_users)
-      result[:sort_by] = params[:sort_by] if params[:sort_by].present?
-      result[:page] = params[:page] if params[:page].present?
-      result[:per_page] = params[:per_page] if params[:per_page].present?
+  def update_event_params
+    params.fetch(:event, ActionController::Parameters.new)
+      .permit(:title, :location, :from_date, :to_date, :owner_id, :category_id, :venue_id)
+  end
+
+  def render_success(resource_key, resource, status: :ok, meta: nil)
+    render json: {
+      success: true,
+      resource_key => resource,
+      meta: meta
+    }.compact, status: status
+  end
+
+  def render_failure(errors, status:)
+    render json: {
+      success: false,
+      errors: normalize_errors(errors)
+    }, status: status
+  end
+
+  def normalize_errors(errors)
+    case errors
+    when ActiveModel::Errors
+      normalize_errors(errors.to_hash)
+    when Hash
+      errors.map { |key, messages| error_entry(key, messages) }
+    else
+      Array(errors).map { |error| normalize_error(error) }
     end
   end
 
-  def normalized_category_ids
-    raw_category_ids = params[:category_ids]
-    return [] if raw_category_ids.blank?
+  def normalize_error(error)
+    return error_entry(error[:key], error[:messages]) if error.is_a?(Hash) && error.key?(:key)
 
-    if raw_category_ids.is_a?(String)
-      raw_category_ids.split(',')
-    else
-      Array(raw_category_ids)
+    if error.is_a?(Hash) && error.size == 1
+      key, messages = error.first
+      return error_entry(key, messages)
     end
+
+    error_entry(:base, error)
+  end
+
+  def error_entry(key, messages)
+    {
+      key: key.to_s,
+      messages: Array(messages)
+    }
   end
 end
