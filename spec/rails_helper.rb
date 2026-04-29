@@ -22,7 +22,7 @@ RSpec.configure do |config|
   config.include Helpers::Request, type: :request
   config.include Helpers::Responses::Event, type: :request
 
-  config.before(:each) do
+  config.before(:each, type: :request) do
     host! 'localhost'
   end
 end

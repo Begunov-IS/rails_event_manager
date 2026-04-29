@@ -280,7 +280,17 @@ RSpec.describe 'GET /events', type: :request do
 
     it 'returns validation error' do
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(json).to eq(failure_response(error_response('sort_by', ['is not included in the list'])))
+      expect(json).to eq(
+        {
+          success: false,
+          errors: [
+            {
+              key: 'sort_by',
+              messages: ['Sort by is not included in the list']
+            }
+          ]
+        }.as_json
+      )
     end
   end
 
@@ -289,7 +299,17 @@ RSpec.describe 'GET /events', type: :request do
 
     it 'returns validation error' do
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(json).to eq(failure_response(error_response('page', ['must be greater than 0'])))
+      expect(json).to eq(
+        {
+          success: false,
+          errors: [
+            {
+              key: 'page',
+              messages: ['Page must be greater than 0']
+            }
+          ]
+        }.as_json
+      )
     end
   end
 
@@ -298,7 +318,17 @@ RSpec.describe 'GET /events', type: :request do
 
     it 'returns validation error' do
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(json).to eq(failure_response(error_response('per_page', ['must be greater than 0'])))
+      expect(json).to eq(
+        {
+          success: false,
+          errors: [
+            {
+              key: 'per_page',
+              messages: ['Per page must be greater than 0']
+            }
+          ]
+        }.as_json
+      )
     end
   end
 end

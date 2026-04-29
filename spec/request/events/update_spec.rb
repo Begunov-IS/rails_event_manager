@@ -26,7 +26,12 @@ RSpec.describe 'PATCH /events/:id', type: :request do
     end
 
     it 'returns event' do
-      expect(json).to eq(success_response(:event, event_base_response(event.reload)))
+      expect(json).to eq(
+        {
+          success: true,
+          event: event_base_response(event.reload)
+        }.as_json
+      )
     end
   end
 
@@ -40,7 +45,17 @@ RSpec.describe 'PATCH /events/:id', type: :request do
     end
 
     it 'returns error message' do
-      expect(json).to eq(failure_response(error_response('base', ['event not found'])))
+      expect(json).to eq(
+        {
+          success: false,
+          errors: [
+            {
+              key: 'event_id',
+              messages: ['Event not found']
+            }
+          ]
+        }.as_json
+      )
     end
   end
 
@@ -52,7 +67,15 @@ RSpec.describe 'PATCH /events/:id', type: :request do
 
       expect(response).to have_http_status(:unprocessable_entity)
       expect(json).to eq(
-        failure_response(error_response('title', ["can't be blank"]))
+        {
+          success: false,
+          errors: [
+            {
+              key: 'title',
+              messages: ["Title can't be blank"]
+            }
+          ]
+        }.as_json
       )
     end
   end
@@ -74,7 +97,12 @@ RSpec.describe 'PATCH /events/:id', type: :request do
       put_json url, params: params
 
       expect(response).to have_http_status(:ok)
-      expect(json).to eq(success_response(:event, event_base_response(event.reload)))
+      expect(json).to eq(
+        {
+          success: true,
+          event: event_base_response(event.reload)
+        }.as_json
+      )
       expect(event.reload.attributes.slice(
         'title',
         'location',

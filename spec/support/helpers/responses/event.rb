@@ -40,38 +40,16 @@ module Helpers
         }.as_json
       end
 
-      def success_response(resource_key, resource, meta: nil)
+      def events_index_response(events, page:, per_page:, total_items:)
         {
           success: true,
-          resource_key => resource,
-          meta: meta
-        }.compact.as_json
-      end
-
-      def failure_response(*errors)
-        {
-          success: false,
-          errors: errors.flatten
-        }.as_json
-      end
-
-      def error_response(key, messages)
-        {
-          key: key,
-          messages: Array(messages)
-        }.as_json
-      end
-
-      def events_index_response(events, page:, per_page:, total_items:)
-        success_response(
-          :events,
-          events.map { |event| event_index_response(event) },
+          events: events.map { |event| event_index_response(event) },
           meta: {
             page: page,
             per_page: per_page,
             total_items: total_items
           }
-        )
+        }.as_json
       end
 
       private
