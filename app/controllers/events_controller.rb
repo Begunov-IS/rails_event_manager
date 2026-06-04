@@ -1,6 +1,6 @@
-class EventsController < ActionController::API
-  before_action :authenticate_user!, only: [:my]
-  before_action :set_event, only: [:show, :update, :destroy]
+class EventsController < ApplicationController
+  before_action :authenticate_user!, only: [ :my ]
+  before_action :set_event, only: [ :show, :update, :destroy ]
 
   def index
     outcome = Events::Index.run(params)
@@ -53,11 +53,11 @@ class EventsController < ActionController::API
   def authenticate_user!
     return if current_user
 
-    render_errors(errors: [{ key: 'base', messages: ['unauthorized'] }], status: :unauthorized)
+    render_errors(errors: [ { key: "base", messages: [ "unauthorized" ] } ], status: :unauthorized)
   end
 
   def current_user
-    @current_user ||= User.find_by(id: request.headers['X-User-Id'])
+    @current_user ||= User.find_by(id: request.headers["X-User-Id"])
   end
 
   def set_event
@@ -70,23 +70,5 @@ class EventsController < ActionController::API
   def event_params
     params.fetch(:event, ActionController::Parameters.new)
       .permit(:title, :location, :from_date, :to_date, :owner_id, :category_id, :venue_id)
-  end
-
-  def render_errors(errors: [], status: :unprocessable_entity)
-    render json: {
-      success: false,
-      errors: errors
-    }, status: status
-  end
-
-  def render_resource_errors(resource, status: :unprocessable_entity)
-    errors = resource.errors.attribute_names.map do |attr|
-      {
-        key: attr.to_s,
-        messages: resource.errors.full_messages_for(attr)
-      }
-    end
-
-    render_errors(errors: errors, status: status)
   end
 end
