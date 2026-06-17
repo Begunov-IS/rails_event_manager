@@ -10,9 +10,9 @@ Category.delete_all
 User.delete_all
 
 # --- Users ---
-u1 = User.create!(name: 'Иван', email: 'ivan@example.com')
-u2 = User.create!(name: 'Иван2', email: 'ivan2@example.com')
-u3 = User.create!(name: 'Иван3', email: 'ivan3@example.com')
+u1 = User.create!(name: 'Иван', email: 'ivan@example.com', password: 'password123', password_confirmation: 'password123')
+u2 = User.create!(name: 'Иван2', email: 'ivan2@example.com', password: 'password123', password_confirmation: 'password123')
+u3 = User.create!(name: 'Иван3', email: 'ivan3@example.com', password: 'password123', password_confirmation: 'password123')
 
 # --- Categories ---
 c1 = Category.create!(title: 'Music')

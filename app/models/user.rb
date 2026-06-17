@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  has_secure_password
+
   has_many :events, foreign_key: :owner_id, dependent: :delete_all
   has_many :tickets, dependent: :delete_all
   has_many :attendances, dependent: :delete_all

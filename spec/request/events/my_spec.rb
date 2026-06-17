@@ -1,45 +1,68 @@
-require 'rails_helper'
+require "rails_helper"
 
-RSpec.describe 'GET /events/my', type: :request do
+RSpec.describe "GET /events/my", type: :request do
   let!(:user) { create(:user) }
   let!(:another_user) { create(:user) }
   let!(:user_event) { create(:event, owner: user) }
   let!(:another_user_event) { create(:event, owner: another_user) }
 
-  let(:url) { '/events/my' }
+  let(:url) { "/events/my" }
+  let(:token) { Auth::JsonWebToken.encode(user_id: user.id) }
 
-  context 'when user authenticated' do
-    before { get url, headers: json_headers.merge('X-User-Id' => user.id.to_s) }
+  context "when user authenticated" do
+    before { get url, headers: json_headers.merge("Authorization" => "Bearer #{token}") }
 
-    it 'returns ok' do
+    it "returns ok" do
       expect(response).to have_http_status(:ok)
     end
 
-    it 'returns only current user events' do
+    it "returns only current user events" do
       expect(json).to eq(
         {
           success: true,
-          events: [event_base_response(user_event.reload)]
+          events: [ event_base_response(user_event.reload) ]
         }.as_json
       )
     end
   end
 
-  context 'when user is not authenticated' do
+  context "when user is not authenticated" do
     before { get url, headers: json_headers }
 
-    it 'returns unauthorized' do
+    it "returns unauthorized" do
       expect(response).to have_http_status(:unauthorized)
     end
 
-    it 'returns error message' do
+    it "returns error message" do
       expect(json).to eq(
         {
           success: false,
           errors: [
             {
-              key: 'base',
-              messages: ['unauthorized']
+              key: "base",
+              messages: [ "401 unauthorized" ]
+            }
+          ]
+        }.as_json
+      )
+    end
+  end
+
+  context "when token is invalid" do
+    before { get url, headers: json_headers.merge("Authorization" => "Bearer invalid-token") }
+
+    it "returns unauthorized" do
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "returns error message" do
+      expect(json).to eq(
+        {
+          success: false,
+          errors: [
+            {
+              key: "base",
+              messages: [ "401 unauthorized" ]
             }
           ]
         }.as_json

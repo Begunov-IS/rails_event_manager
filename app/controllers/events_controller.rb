@@ -50,16 +50,6 @@ class EventsController < ApplicationController
 
   private
 
-  def authenticate_user!
-    return if current_user
-
-    render_errors(errors: [ { key: "base", messages: [ "unauthorized" ] } ], status: :unauthorized)
-  end
-
-  def current_user
-    @current_user ||= User.find_by(id: request.headers["X-User-Id"])
-  end
-
   def set_event
     outcome = Events::Find.run(event_id: params[:id])
     return render_resource_errors(outcome, status: :not_found) if outcome.errors.present?
