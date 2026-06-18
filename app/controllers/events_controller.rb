@@ -7,40 +7,42 @@ class EventsController < ApplicationController
     return render_resource_errors(outcome) if outcome.errors.present?
 
     result = outcome.result
-    render json: { success: true }.merge(
-      EventBlueprint.render_as_hash(
+    render json: {
+      success: true,
+      **EventBlueprint.render_as_hash(
         result[:events],
         view: :index,
         root: :events,
         meta: result[:pagination_info],
         events_info: result[:events_info]
       )
-    )
+    }
   end
 
   def my
     events = Events::My.run!(user: current_user)
-    render json: { success: true }.merge(EventBlueprint.render_as_hash(events, view: :basic, root: :events))
+    render json: { success: true, **EventBlueprint.render_as_hash(events, view: :basic, root: :events) }
   end
 
   def show
-    render json: { success: true }.merge(EventBlueprint.render_as_hash(@event, view: :basic, root: :event))
+    render json: { success: true, **EventBlueprint.render_as_hash(@event, view: :basic, root: :event) }
   end
 
   def create
     outcome = Events::Create.run(event_params)
     return render_resource_errors(outcome) if outcome.errors.present?
 
-    render json: { success: true }.merge(
-      EventBlueprint.render_as_hash(outcome.result, view: :basic, root: :event)
-    ), status: :created
+    render json: {
+      success: true,
+      **EventBlueprint.render_as_hash(outcome.result, view: :basic, root: :event)
+    }, status: :created
   end
 
   def update
     outcome = Events::Update.run(event_params.merge(event: @event))
     return render_resource_errors(outcome) if outcome.errors.present?
 
-    render json: { success: true }.merge(EventBlueprint.render_as_hash(outcome.result, view: :basic, root: :event))
+    render json: { success: true, **EventBlueprint.render_as_hash(outcome.result, view: :basic, root: :event) }
   end
 
   def destroy
@@ -59,6 +61,5 @@ class EventsController < ApplicationController
 
   def event_params
     params.fetch(:event, ActionController::Parameters.new)
-      .permit(:title, :location, :from_date, :to_date, :owner_id, :category_id, :venue_id)
   end
 end

@@ -29,3 +29,7 @@
 
 en:
   hello: "Hello world"
+  errors:
+    messages:
+      invalid_email_or_password: "invalid email or password"
+      unauthorized: "401 unauthorized"

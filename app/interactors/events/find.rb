@@ -3,9 +3,8 @@ class Events::Find < ActiveInteraction::Base
 
   def execute
     event = Event.find_by(id: event_id)
-    return event if event
+    return errors.add(:event_id, :not_found) unless event
 
-    errors.add(:event_id, :not_found)
-    nil
+    event
   end
 end

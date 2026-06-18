@@ -5,7 +5,7 @@ class AuthController < ApplicationController
 
     render json: {
       success: true,
-      user: user_response(user)
+      user: UserBlueprint.render_as_hash(user, view: :basic)
     }, status: :created
   end
 
@@ -16,7 +16,7 @@ class AuthController < ApplicationController
     render json: {
       success: true,
       token: Auth::JsonWebToken.encode(user_id: user.id),
-      user: user_response(user)
+      user: UserBlueprint.render_as_hash(user, view: :basic)
     }
   end
 
@@ -27,13 +27,9 @@ class AuthController < ApplicationController
       .permit(:name, :email, :password, :password_confirmation)
   end
 
-  def user_response(user)
-    UserBlueprint.render_as_hash(user, view: :basic)
-  end
-
   def render_invalid_credentials
     render_errors(
-      errors: [ { key: "base", messages: [ "invalid email or password" ] } ],
+      errors: [ { key: "base", messages: [ I18n.t("errors.messages.invalid_email_or_password") ] } ],
       status: :unauthorized
     )
   end
