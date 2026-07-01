@@ -7,10 +7,10 @@ RSpec.describe "GET /events/my", type: :request do
   let!(:another_user_event) { create(:event, owner: another_user) }
 
   let(:url) { "/events/my" }
-  let(:token) { Auth::JsonWebToken.encode(user_id: user.id) }
+  let(:token) { Encryptors::Jwt::Encrypt.run!(payload: { user_id: user.id }) }
 
   context "when user authenticated" do
-    before { get url, headers: json_headers.merge("Authorization" => "Bearer #{token}") }
+    before { get url, headers: json_headers.merge("Session-Token" => token) }
 
     it "returns ok" do
       expect(response).to have_http_status(:ok)
@@ -49,7 +49,7 @@ RSpec.describe "GET /events/my", type: :request do
   end
 
   context "when token is invalid" do
-    before { get url, headers: json_headers.merge("Authorization" => "Bearer invalid-token") }
+    before { get url, headers: json_headers.merge("Session-Token" => "invalid-token") }
 
     it "returns unauthorized" do
       expect(response).to have_http_status(:unauthorized)

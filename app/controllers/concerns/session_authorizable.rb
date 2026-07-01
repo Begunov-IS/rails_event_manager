@@ -16,16 +16,9 @@ module SessionAuthorizable
   end
 
   def find_user_by_token
-    payload = Auth::JsonWebToken.decode(bearer_token)
-    return if payload.blank?
+    token = Encryptors::Jwt::Decrypt.run(token: request.headers["Session-Token"])
+    return if token.errors.present?
 
-    User.find_by(id: payload["user_id"])
-  end
-
-  def bearer_token
-    authorization_header = request.headers["Authorization"].to_s
-    match = authorization_header.match(/\ABearer (.+)\z/)
-
-    match&.[](1)
+    User.find_by(id: token.result["user_id"])
   end
 end

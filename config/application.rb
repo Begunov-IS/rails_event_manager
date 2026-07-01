@@ -35,6 +35,8 @@ module RailsTaskManager
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    config.session_jwt_secret_key = ENV.fetch("SESSION_JWT_SECRET_KEY") { Rails.application.secret_key_base }
+    config.jwt_token_expire_time = 24.hours.to_i
 
     # Don't generate system test files.
     config.generators.system_tests = nil
