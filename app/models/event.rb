@@ -9,6 +9,8 @@ class Event < ApplicationRecord
   has_many :attendees, through: :attendances, source: :user
   has_many :reviews, dependent: :delete_all
 
+  scope :owned_by, ->(user) { where(owner: user) }
+
   validates :title, :location, :from_date, :to_date, :owner_id, presence: true
   validate :end_date_after_start_date
 

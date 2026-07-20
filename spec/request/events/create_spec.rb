@@ -17,33 +17,55 @@ RSpec.describe 'POST /events', type: :request do
   end
 
   context 'success' do
-    before { post_json url, params: params }
-
     it 'returns created' do
+      post_json url, params: params
+
       expect(response).to have_http_status(:created)
     end
 
     it 'returns event' do
+      post_json url, params: params
+
       event = Event.last
-      expect(json).to eq(event_base_response(event))
+      expect(json).to eq(
+        {
+          success: true,
+          event: event_base_response(event)
+        }.as_json
+      )
     end
 
     it 'creates event in database' do
-      expect(Event.count).to eq(1)
+      expect { post_json url, params: params }.to change { Event.count }.by(1)
     end
   end
 
   context 'when params invalid' do
     let(:params) { { event: { title: '', location: '' } } }
 
-    before { post_json url, params: params }
+    it 'returns unprocessable entity with errors' do
+      post_json url, params: params
 
-    it 'returns unprocessable entity' do
       expect(response).to have_http_status(:unprocessable_entity)
-    end
-
-    it 'returns errors' do
-      expect(json).to have_key('errors')
+      expect(json).to eq(
+        {
+          success: false,
+          errors: [
+            {
+              key: 'from_date',
+              messages: ['From date is required']
+            },
+            {
+              key: 'to_date',
+              messages: ['To date is required']
+            },
+            {
+              key: 'owner_id',
+              messages: ['Owner is required']
+            }
+          ]
+        }.as_json
+      )
     end
   end
 end

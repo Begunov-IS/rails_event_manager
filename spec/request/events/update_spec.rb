@@ -21,12 +21,17 @@ RSpec.describe 'PATCH /events/:id', type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it 'returns updated event' do
-      expect(json['title']).to eq('Новое название')
-    end
-
     it 'updates event in database' do
       expect(event.reload.title).to eq('Новое название')
+    end
+
+    it 'returns event' do
+      expect(json).to eq(
+        {
+          success: true,
+          event: event_base_response(event.reload)
+        }.as_json
+      )
     end
   end
 
@@ -40,21 +45,73 @@ RSpec.describe 'PATCH /events/:id', type: :request do
     end
 
     it 'returns error message' do
-      expect(json).to eq({ 'error' => 'event not found' })
+      expect(json).to eq(
+        {
+          success: false,
+          errors: [
+            {
+              key: 'event_id',
+              messages: ['Event not found']
+            }
+          ]
+        }.as_json
+      )
     end
   end
 
   context 'when params invalid' do
     let(:params) { { event: { title: '' } } }
 
-    before { put_json url, params: params }
+    it 'returns unprocessable entity with errors' do
+      put_json url, params: params
 
-    it 'returns unprocessable entity' do
       expect(response).to have_http_status(:unprocessable_entity)
+      expect(json).to eq(
+        {
+          success: false,
+          errors: [
+            {
+              key: 'title',
+              messages: ["Title can't be blank"]
+            }
+          ]
+        }.as_json
+      )
     end
+  end
 
-    it 'returns errors' do
-      expect(json).to have_key('errors')
+  context 'when params are empty' do
+    let(:params) { { event: {} } }
+
+    it 'does not change event' do
+      initial_attributes = event.reload.attributes.slice(
+        'title',
+        'location',
+        'from_date',
+        'to_date',
+        'owner_id',
+        'category_id',
+        'venue_id'
+      )
+
+      put_json url, params: params
+
+      expect(response).to have_http_status(:ok)
+      expect(json).to eq(
+        {
+          success: true,
+          event: event_base_response(event.reload)
+        }.as_json
+      )
+      expect(event.reload.attributes.slice(
+        'title',
+        'location',
+        'from_date',
+        'to_date',
+        'owner_id',
+        'category_id',
+        'venue_id'
+      )).to eq(initial_attributes)
     end
   end
 end
