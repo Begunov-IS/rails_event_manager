@@ -1,20 +1,2 @@
 #!/usr/bin/env ruby
-
-pids = []
-
-def stop(pid)
-  Process.kill("TERM", pid)
-rescue Errno::ESRCH
-end
-
-Signal.trap("INT") { exit }
-Signal.trap("TERM") { exit }
-
-begin
-  pids << spawn("./bin/rails", "server", *ARGV)
-  pids << spawn("bundle", "exec", "sidekiq")
-
-  Process.wait
-ensure
-  pids.each { |pid| stop(pid) }
-end
+exec "./bin/rails", "server", *ARGV

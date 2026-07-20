@@ -1,13 +1,10 @@
 class Auth::Register < ActiveInteraction::Base
-  string :name
-  string :email
-  string :password
-  string :password_confirmation
+  string :name, :email, :password, :password_confirmation
 
   def execute
     user = User.new(inputs)
-    return user if user.save
+    return errors.merge!(user.errors) unless user.save
 
-    errors.merge!(user.errors)
+    user
   end
 end

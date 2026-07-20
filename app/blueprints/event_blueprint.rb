@@ -38,7 +38,7 @@ class EventBlueprint < Blueprinter::Base
     end
 
     association :category, blueprint: CategoryBlueprint, view: :basic
-    association :owner, blueprint: UserBlueprint, view: :index
+    association :owner, blueprint: UserBlueprint, view: :basic
     association :venue, blueprint: VenueBlueprint, view: :index
 
     association :sponsors, blueprint: SponsorBlueprint, view: :basic do |event, options|
